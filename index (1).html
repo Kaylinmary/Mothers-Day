@@ -76,33 +76,7 @@
        — This layer sits on top of everything, plays the video,
          then fades out revealing the book sequence below.
     ============================================================ */
-    #video-intro {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      transition: opacity 1.4s ease, visibility 1.4s ease;
-    }
-    #video-intro.fading {
-      opacity: 0;
-    }
-    #video-intro.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    #intro-video {
-      /* Fill the viewport, letter- or pillar-box as needed */
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+ 
 
     /* Skip button — appears after 2 s */
     #skip-btn {
@@ -133,21 +107,6 @@
     }
 
     /* Placeholder shown when no video file is present */
-    #video-placeholder-notice {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1.2rem;
-      padding: 2rem;
-      background: radial-gradient(ellipse at 50% 60%, #0d2060 0%, #050d2a 100%);
-      text-align: center;
-    }
-    .vp-stars {
-      font-size: clamp(2rem, 8vw, 4rem);
-      animation: starPulse 2s ease-in-out infinite alternate;
     }
     .vp-title {
       font-family: 'Cinzel Decorative', cursive;
