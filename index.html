@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Once Upon A Mother's Day</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS VARIABLES — Sleeping Beauty Dreamy Blue & Pink Palette
+       Inspired by: Aurora's dress debate (blue vs pink),
+       the fairy-tale sky, the enchanted forest dawn
+    ============================================================ */
+    :root {
+      /* Core blue — the midnight fairy-gift blue */
+      --blue:           #5B8FD4;
+      --blue-light:     #A8C8F0;
+      --blue-pale:      #D6E8FA;
+      --blue-deep:      #2B5494;
+      --blue-midnight:  #0E1F4A;
+      --blue-sky:       #7FB3E8;
+
+      /* Core pink — Aurora's rose-petal pink */
+      --pink:           #E88FAA;
+      --pink-light:     #F5C0CE;
+      --pink-pale:      #FDE8EF;
+      --pink-deep:      #C4566F;
+      --pink-blush:     #FADADD;
+
+      /* Gold — the storybook gilding */
+      --gold:           #C9A84C;
+      --gold-light:     #EDD07A;
+      --gold-pale:      #FAF0C8;
+
+      /* Parchment / background */
+      --parchment:      #F0F4FF;   /* blue-tinted white */
+      --parchment-dark: #D8E6F8;
+      --cream:          #EEF4FF;
+
+      /* Text */
+      --ink:            #1A2340;
+      --ink-light:      #3A4D70;
+      --ink-mid:        #2E3F6A;
+
+      /* Misc */
+      --shadow:         rgba(11,31,80,0.22);
+      --glow-blue:      rgba(91,143,212,0.45);
+      --glow-pink:      rgba(232,143,170,0.45);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--blue-midnight);
+      color: var(--ink);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       SPARKLE CANVAS
+    ============================================================ */
+    #sparkle-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       ★ VIDEO INTRO LAYER
+       — Place your Sleeping Beauty intro clip at:
+         assets/video/sleeping-beauty-intro.mp4
+       — This layer sits on top of everything, plays the video,
+         then fades out revealing the book sequence below.
+    ============================================================ */
+    #video-intro {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: opacity 1.4s ease, visibility 1.4s ease;
+    }
+    #video-intro.fading {
+      opacity: 0;
+    }
+    #video-intro.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #intro-video {
+      /* Fill the viewport, letter- or pillar-box as needed */
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Skip button — appears after 2 s */
+    #skip-btn {
+      position: absolute;
+      bottom: clamp(1.5rem, 5vw, 3rem);
+      right:  clamp(1.5rem, 5vw, 3rem);
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.35);
+      padding: 0.55rem 1.2rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      opacity: 0;
+      animation: skipAppear 0.5s ease 2s forwards;
+    }
+    #skip-btn:hover {
+      color: #fff;
+      border-color: var(--gold-light);
+      background: rgba(0,0,0,0.65);
+    }
+    @keyframes skipAppear {
+      to { opacity: 1; }
+    }
+
+    /* Placeholder shown when no video file is present */
+    #video-placeholder-notice {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      padding: 2rem;
+      background: radial-gradient(ellipse at 50% 60%, #0d2060 0%, #050d2a 100%);
+      text-align: center;
+    }
+    .vp-stars {
+      font-size: clamp(2rem, 8vw, 4rem);
+      animation: starPulse 2s ease-in-out infinite alternate;
+    }
+    .vp-title {
+      font-family: 'Cinzel Decorative', cursive;
+      color: var(--gold-light);
+      font-size: clamp(0.9rem, 3vw, 1.5rem);
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 20px var(--gold);
+    }
+    .vp-instruction {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      color: var(--blue-light);
+      font-size: clamp(0.75rem, 2vw, 0.95rem);
+      max-width: 500px;
+      line-height: 1.7;
+      opacity: 0.85;
+    }
+    .vp-instruction code {
+      font-style: normal;
+      color: var(--pink-light);
+      font-size: 0.85em;
+      background: rgba(255,255,255,0.08);
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+    @keyframes starPulse {
+      from { filter: drop-shadow(0 0 8px var(--gold)); }
+      to   { filter: drop-shadow(0 0 24px var(--gold-light)); }
+    }
+
+    /* ============================================================
+       INTRO OVERLAY — enchanted forest title screen
+       (shown after video fades out, before book opens)
+    ============================================================ */
+    #intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(ellipse at 50% 55%,
+        #0d1e50 0%,
+        #050d2a 65%,
+        #020818 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    #intro-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    #intro-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .intro-title {
+      font-family: 'Cinzel Decorative', cursive;
+      color: var(--gold-light);
+      font-size: clamp(1.1rem, 4vw, 2rem);
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-shadow: 0 0 30px var(--gold), 0 0 60px var(--gold-light);
+      margin-bottom: 1rem;
+      padding: 0 1.5rem;
+      animation: fadeFlicker 2.4s ease-in-out infinite alternate;
+    }
+    .intro-subtitle {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      color: var(--pink-light);
+      font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+      text-align: center;
+      letter-spacing: 0.06em;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+    }
+    .open-book-btn {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.8rem, 2.5vw, 1rem);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--parchment);
+      background: linear-gradient(135deg, var(--blue-deep) 0%, #1a0d3e 50%, var(--pink-deep) 100%);
+      border: 2px solid var(--gold);
+      padding: 1rem 2.5rem;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px var(--glow-blue), inset 0 0 20px rgba(0,0,0,0.3);
+      border-radius: 2px;
+    }
+    .open-book-btn:hover {
+      background: linear-gradient(135deg, var(--blue) 0%, #1a0d3e 50%, var(--pink) 100%);
+      box-shadow: 0 0 40px var(--glow-pink), 0 0 20px var(--glow-blue);
+      transform: scale(1.04);
+    }
+    .open-book-btn::before,
+    .open-book-btn::after {
+      content: '✦';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold-light);
+      font-size: 0.8rem;
+    }
+    .open-book-btn::before { left: 0.8rem; }
+    .open-book-btn::after  { right: 0.8rem; }
+
+    /* Floating fairy dots */
+    .fairy-dots {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .fairy-dot {
+      position: absolute;
+      border-radius: 50%;
+      animation: fairyFloat linear infinite;
+    }
+    @keyframes fairyFloat {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; transform: translateY(90vh) scale(1); }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(0.5); opacity: 0; }
+    }
+    @keyframes fadeFlicker {
+      0%   { opacity: 0.85; text-shadow: 0 0 20px var(--gold), 0 0 40px var(--gold-light); }
+      100% { opacity: 1;    text-shadow: 0 0 50px var(--gold-light), 0 0 90px #fff8c0; }
+    }
+
+    /* ============================================================
+       BOOK WRAPPER — 3-D page-turn
+    ============================================================ */
+    #book-wrapper {
+      position: fixed;
+      inset: 0;
+      z-index: 9990;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 50% 55%,
+        #0d1e50 0%, #050d2a 100%);
+      perspective: 1200px;
+      transition: opacity 0.6s ease 1.2s, visibility 0.6s ease 1.2s;
+    }
+    #book-wrapper.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .book-3d {
+      width: min(680px, 94vw);
+      height: min(460px, 65vw);
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    .book-cover {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px 16px 16px 4px;
+      background: linear-gradient(160deg,
+        var(--blue-midnight) 0%,
+        var(--blue-deep)     35%,
+        #1a0040              65%,
+        var(--pink-deep)     100%);
+      border: 3px solid var(--gold);
+      box-shadow:
+        inset 0 0 60px rgba(201,168,76,0.12),
+        -8px 8px 40px rgba(0,0,0,0.7),
+        0 0 80px var(--glow-blue);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem;
+      transform-origin: left center;
+      backface-visibility: hidden;
+      transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .book-cover.open { transform: rotateY(-160deg); }
+
+    .book-cover-title {
+      font-family: 'Cinzel Decorative', cursive;
+      color: var(--gold-light);
+      font-size: clamp(1rem, 3.5vw, 1.8rem);
+      text-align: center;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 20px var(--gold);
+      line-height: 1.3;
+    }
+    .book-cover-subtitle {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      color: var(--pink-light);
+      font-size: clamp(0.7rem, 2vw, 1rem);
+      text-align: center;
+      letter-spacing: 0.1em;
+    }
+    .book-cover-rose {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      filter: drop-shadow(0 0 14px var(--pink));
+      animation: roseGlow 3s ease-in-out infinite alternate;
+    }
+    .book-cover-ornament {
+      font-size: 1.2rem;
+      color: var(--gold-light);
+      letter-spacing: 0.3em;
+    }
+    .book-spine {
+      position: absolute;
+      left: -18px; top: 0; bottom: 0; width: 18px;
+      background: linear-gradient(90deg, #030d28, var(--blue-midnight));
+      border-radius: 4px 0 0 4px;
+      border: 2px solid var(--gold);
+      border-right: none;
+    }
+    .book-inside {
+      position: absolute;
+      inset: 0;
+      border-radius: 4px 16px 16px 4px;
+      background: var(--parchment);
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .book-inside-zoom {
+      width: 100%; height: 100%;
+      transform: scale(0.15);
+      opacity: 0;
+      transition: transform 1.4s cubic-bezier(0.2, 0, 0.1, 1) 0.8s,
+                  opacity   0.6s ease 0.8s;
+    }
+    .book-inside-zoom.zoomed { transform: scale(1); opacity: 1; }
+
+    .book-inside-preview {
+      width: 100%; height: 100%;
+      background: linear-gradient(160deg, var(--cream) 0%, var(--parchment-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel Decorative', cursive;
+      color: var(--blue-deep);
+      font-size: clamp(0.8rem, 2vw, 1.1rem);
+      text-align: center;
+      padding: 2rem;
+    }
+
+    @keyframes roseGlow {
+      from { filter: drop-shadow(0 0 8px var(--pink)); }
+      to   { filter: drop-shadow(0 0 24px var(--pink-light)); }
+    }
+
+    /* ============================================================
+       MAIN PAGE
+    ============================================================ */
+    #main-page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      /* Dreamy blue-sky parchment */
+      background:
+        linear-gradient(175deg,
+          var(--cream)          0%,
+          var(--blue-pale)      30%,
+          var(--pink-pale)      65%,
+          var(--parchment-dark) 100%);
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    #main-page.visible { opacity: 1; }
+
+    /* Decorative border — alternating blue/pink/gold */
+    #main-page::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      border: 12px solid transparent;
+      border-image:
+        repeating-linear-gradient(
+          45deg,
+          var(--gold)       0px,  var(--gold)       6px,
+          transparent       6px,  transparent       12px,
+          var(--blue-sky)   12px, var(--blue-sky)   16px,
+          transparent       16px, transparent       22px,
+          var(--pink)       22px, var(--pink)       26px,
+          transparent       26px, transparent       32px
+        ) 12;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* ============================================================
+       SITE HEADER
+    ============================================================ */
+    .site-header {
+      text-align: center;
+      padding: clamp(3rem, 8vw, 6rem) 1.5rem clamp(1.5rem, 4vw, 3rem);
+      position: relative;
+    }
+    .site-header::after {
+      content: '';
+      display: block;
+      margin: 1.5rem auto 0;
+      width: min(600px, 80vw);
+      height: 2px;
+      background: linear-gradient(90deg,
+        transparent, var(--blue-sky), var(--gold), var(--pink), var(--gold), var(--blue-sky), transparent);
+    }
+    .header-eyebrow {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: clamp(0.75rem, 2.5vw, 1rem);
+      color: var(--blue-deep);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .header-title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1.6rem, 6vw, 3.8rem);
+      color: var(--blue-deep);
+      line-height: 1.15;
+      letter-spacing: 0.04em;
+      text-shadow: 2px 2px 0 var(--blue-pale), 4px 4px 14px var(--glow-blue);
+      margin-bottom: 0.5rem;
+    }
+    .header-title span {
+      color: var(--pink-deep);
+      text-shadow: 2px 2px 0 var(--pink-pale), 0 0 20px var(--glow-pink);
+    }
+    .header-tagline {
+      font-family: 'Lora', serif;
+      font-style: italic;
+      font-size: clamp(0.85rem, 2.5vw, 1.15rem);
+      color: var(--ink-light);
+      letter-spacing: 0.05em;
+      margin-top: 0.75rem;
+    }
+    .header-ornament {
+      margin: 1rem 0 0;
+      color: var(--gold);
+      font-size: 1.4rem;
+      letter-spacing: 0.5em;
+    }
+
+    /* ============================================================
+       DEDICATION
+    ============================================================ */
+    .dedication-section {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 2.5rem;
+      text-align: center;
+    }
+    .dedication-section p {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+      color: var(--ink-light);
+      line-height: 1.85;
+    }
+    .dedication-section p strong {
+      color: var(--blue-deep);
+      font-style: normal;
+    }
+
+    .divider {
+      text-align: center;
+      color: var(--gold);
+      font-size: 1.2rem;
+      letter-spacing: 0.8em;
+      margin: 0.5rem 0;
+      opacity: 0.75;
+    }
+
+    /* ============================================================
+       TIMELINE
+    ============================================================ */
+    .timeline-section {
+      padding: 2rem 0 6rem;
+      position: relative;
+    }
+    .timeline-section-title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1rem, 3vw, 1.6rem);
+      color: var(--blue-deep);
+      text-align: center;
+      letter-spacing: 0.1em;
+      margin-bottom: 3rem;
+    }
+    .timeline-section-title::before,
+    .timeline-section-title::after {
+      content: '❧';
+      color: var(--pink);
+      margin: 0 1rem;
+      font-size: 1.2em;
+    }
+
+    /* Vine — blue-to-pink gradient */
+    .timeline-line {
+      position: absolute;
+      left: 50%;
+      top: 0; bottom: 0;
+      width: 4px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg,
+        transparent      0%,
+        var(--blue-sky)  10%,
+        var(--blue)      40%,
+        var(--pink)      70%,
+        var(--pink-light) 90%,
+        transparent      100%);
+      border-radius: 4px;
+    }
+    .timeline-line::before,
+    .timeline-line::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px; height: 12px;
+      background: var(--gold);
+      border-radius: 50%;
+      border: 2px solid var(--blue);
+    }
+    .timeline-line::before { top: 0; }
+    .timeline-line::after  { bottom: 0; }
+
+    .timeline-entry {
+      display: flex;
+      align-items: flex-start;
+      position: relative;
+      margin-bottom: clamp(3rem, 8vw, 5rem);
+      padding: 0 clamp(1rem, 4vw, 3rem);
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .timeline-entry.visible { opacity: 1; transform: translateY(0); }
+
+    .timeline-entry:nth-child(odd)  { flex-direction: row;         padding-right: calc(50% + 2.5rem); }
+    .timeline-entry:nth-child(even) { flex-direction: row-reverse; padding-left:  calc(50% + 2.5rem); }
+
+    /* Spine node alternates blue / pink */
+    .timeline-node {
+      position: absolute;
+      left: 50%;
+      top: 1.5rem;
+      transform: translateX(-50%);
+      width: 28px; height: 28px;
+      background: radial-gradient(circle, var(--gold-light) 30%, var(--gold) 100%);
+      border-radius: 50%;
+      border: 3px solid var(--blue-deep);
+      box-shadow: 0 0 14px var(--gold), 0 0 6px var(--blue-sky);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+    .timeline-entry:nth-child(even) .timeline-node {
+      border-color: var(--pink-deep);
+      box-shadow: 0 0 14px var(--gold), 0 0 6px var(--pink);
+    }
+
+    /* Card */
+    .timeline-card {
+      background: linear-gradient(135deg,
+        rgba(240,244,255,0.97) 0%,
+        rgba(216,230,248,0.95) 100%);
+      border: 1.5px solid var(--blue-sky);
+      border-radius: 8px;
+      padding: clamp(1.2rem, 3vw, 2rem);
+      box-shadow:
+        4px 6px 20px var(--shadow),
+        inset 0 0 30px rgba(91,143,212,0.05);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Pink-tinted cards on even entries */
+    .timeline-entry:nth-child(even) .timeline-card {
+      background: linear-gradient(135deg,
+        rgba(253,232,239,0.97) 0%,
+        rgba(245,192,206,0.88) 100%);
+      border-color: var(--pink-light);
+      box-shadow:
+        4px 6px 20px var(--shadow),
+        inset 0 0 30px rgba(232,143,170,0.06);
+    }
+    .timeline-card::after {
+      content: '✿';
+      position: absolute;
+      top: 0.5rem; right: 0.75rem;
+      color: var(--blue-light);
+      font-size: 1rem;
+      opacity: 0.55;
+    }
+    .timeline-entry:nth-child(even) .timeline-card::after {
+      color: var(--pink-light);
+    }
+
+    .card-date {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 0.4rem;
+    }
+    .timeline-entry:nth-child(even) .card-date { color: var(--pink-deep); }
+
+    .card-title {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+      color: var(--blue-deep);
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+    .timeline-entry:nth-child(even) .card-title { color: var(--pink-deep); }
+
+    .card-copy {
+      font-family: 'Lora', serif;
+      font-size: clamp(0.85rem, 2vw, 0.95rem);
+      color: var(--ink-light);
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .card-copy em { color: var(--blue-deep); font-style: italic; }
+    .timeline-entry:nth-child(even) .card-copy em { color: var(--pink-deep); }
+
+    /* ============================================================
+       MEDIA PLACEHOLDERS
+    ============================================================ */
+    .media-placeholder {
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 0.75rem;
+      position: relative;
+      background: linear-gradient(135deg, var(--parchment-dark), var(--blue-pale));
+      border: 1.5px dashed var(--blue-sky);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .media-placeholder:hover {
+      background: linear-gradient(135deg, var(--blue-pale), var(--pink-blush));
+      border-color: var(--pink);
+    }
+    .timeline-entry:nth-child(even) .media-placeholder {
+      background: linear-gradient(135deg, var(--pink-blush), var(--parchment-dark));
+      border-color: var(--pink);
+    }
+    .timeline-entry:nth-child(even) .media-placeholder:hover {
+      background: linear-gradient(135deg, var(--pink-pale), var(--blue-pale));
+      border-color: var(--blue-sky);
+    }
+    .placeholder-icon  { font-size: 2rem; }
+    .placeholder-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--blue-deep);
+      opacity: 0.8;
+    }
+    .placeholder-hint {
+      font-family: 'Lora', serif;
+      font-size: 0.7rem;
+      font-style: italic;
+      color: var(--ink-light);
+      text-align: center;
+      padding: 0 1rem;
+      opacity: 0.65;
+    }
+
+    .photo-placeholder { width: 100%; aspect-ratio: 4/3; }
+    .video-placeholder { width: 100%; aspect-ratio: 16/9; }
+    .audio-placeholder { width: 100%; height: 80px; }
+
+    .timeline-card img.actual-photo   { width: 100%; border-radius: 6px; border: 2px solid var(--blue-sky); display: block; margin-top: 0.75rem; }
+    .timeline-card video.actual-video { width: 100%; border-radius: 6px; display: block; margin-top: 0.75rem; }
+    .timeline-card audio.actual-audio { width: 100%; margin-top: 0.75rem; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    .photo-grid .photo-placeholder { aspect-ratio: 1; }
+
+    /* ============================================================
+       CLOSING SECTION
+    ============================================================ */
+    .closing-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(2rem, 6vw, 4rem) 2rem 4rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .closing-section.visible { opacity: 1; transform: translateY(0); }
+
+    .closing-roses {
+      font-size: clamp(2rem, 8vw, 4rem);
+      line-height: 1;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 4px 12px var(--glow-pink));
+    }
+    .closing-message {
+      font-family: 'Cinzel Decorative', cursive;
+      font-size: clamp(1rem, 3.5vw, 1.8rem);
+      color: var(--blue-deep);
+      line-height: 1.4;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 8px var(--glow-blue);
+    }
+    .closing-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      color: var(--ink-light);
+      line-height: 1.7;
+    }
+    .closing-signature {
+      margin-top: 2rem;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       FLOATING PETALS
+    ============================================================ */
+    .petal {
+      position: fixed;
+      pointer-events: none;
+      font-size: clamp(0.8rem, 2vw, 1.2rem);
+      animation: petalFall linear infinite;
+      z-index: 0;
+      opacity: 0;
+    }
+    @keyframes petalFall {
+      0%   { transform: translateY(-5vh) rotate(0deg) translateX(0); opacity: 0; }
+      5%   { opacity: 0.7; }
+      95%  { opacity: 0.5; }
+      100% { transform: translateY(105vh) rotate(720deg) translateX(40px); opacity: 0; }
+    }
+
+    /* ============================================================
+       SCROLL VINE PROGRESS
+    ============================================================ */
+    #scroll-vine {
+      position: fixed;
+      left: clamp(6px, 2vw, 18px);
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #scroll-vine.visible { opacity: 1; }
+    .vine-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      border: 1.5px solid var(--blue);
+      transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .vine-dot.active {
+      background: var(--pink);
+      border-color: var(--pink-deep);
+      transform: scale(1.4);
+      box-shadow: 0 0 8px var(--pink);
+    }
+
+    /* ============================================================
+       MOBILE
+    ============================================================ */
+    @media (max-width: 640px) {
+      .timeline-line { left: 24px; }
+      .timeline-entry:nth-child(odd),
+      .timeline-entry:nth-child(even) {
+        flex-direction: column;
+        padding: 0 1rem 0 56px;
+      }
+      .timeline-node { left: 24px; width: 22px; height: 22px; font-size: 0.6rem; }
+      .book-3d { height: min(380px, 80vw); }
+      #scroll-vine { display: none; }
+    }
+
+    /* ============================================================
+       UTILITY
+    ============================================================ */
+    ::selection { background: var(--blue-light); color: var(--ink); }
+    @media (prefers-reduced-motion: reduce) {
+      .timeline-entry, .closing-section { opacity: 1; transform: none; transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- =====================================================
+     SPARKLE CANVAS
+===================================================== -->
+<canvas id="sparkle-canvas" aria-hidden="true"></canvas>
+
+<!-- =====================================================
+     ★ VIDEO INTRO LAYER
+     ─────────────────────────────────────────────────
+     HOW TO ACTIVATE:
+     1. Save your Sleeping Beauty intro clip as:
+        assets/video/sleeping-beauty-intro.mp4
+     2. Remove the <!-- VIDEO-OFF --> comment markers
+        around the <video> tag below (lines marked ▼▲)
+     3. The placeholder notice will hide automatically
+        once the <video> element is present and loads.
+     ─────────────────────────────────────────────────
+===================================================== -->
+<div id="video-intro">
+
+  <!-- ▼ VIDEO-OFF: remove these comment markers when your video file is ready -->
+  <!--
+  <video
+    id="intro-video"
+    src="assets/video/sleeping-beauty-intro.mp4"
+    playsinline
+    muted
+    preload="auto"
+    aria-label="Sleeping Beauty movie introduction"
+  ></video>
+  -->
+  <!-- ▲ VIDEO-OFF -->
+
+  <!-- Placeholder shown until video file is added — delete this block once video is live -->
+  <div id="video-placeholder-notice" aria-hidden="true">
+    <div class="vp-stars">✨🌙✨</div>
+    <p class="vp-title">Video Intro Placeholder</p>
+    <p class="vp-instruction">
+      Add your Sleeping Beauty intro clip at<br>
+      <code>assets/video/sleeping-beauty-intro.mp4</code><br><br>
+      Then uncomment the <code>&lt;video&gt;</code> tag in<br>
+      <code>index.html</code> (see the VIDEO-OFF markers).<br><br>
+      This placeholder will disappear automatically.
+    </p>
+  </div>
+
+  <button id="skip-btn" aria-label="Skip intro">Skip ›</button>
+</div>
+
+<!-- =====================================================
+     INTRO OVERLAY (title screen after video)
+===================================================== -->
+<div id="intro-overlay" role="dialog" aria-label="Welcome screen">
+  <div class="fairy-dots" id="fairy-container" aria-hidden="true"></div>
+  <p class="intro-title">Once Upon A Mother's Day</p>
+  <p class="intro-subtitle">A Storybook of Love, Made Just for You</p>
+  <button class="open-book-btn" id="open-book-btn" aria-label="Open the storybook">
+    Open the Book
+  </button>
+</div>
+
+<!-- =====================================================
+     BOOK ANIMATION
+===================================================== -->
+<div id="book-wrapper" class="hidden" aria-hidden="true">
+  <div class="book-3d" id="book-3d">
+    <div class="book-spine"></div>
+    <div class="book-inside">
+      <div class="book-inside-zoom" id="book-inside-zoom">
+        <div class="book-inside-preview">✿ &nbsp; Your Story Awaits &nbsp; ✿</div>
+      </div>
+    </div>
+    <div class="book-cover" id="book-cover">
+      <div class="book-cover-rose" aria-hidden="true">🌹</div>
+      <div class="book-cover-title">Once Upon<br>A Mother's Day</div>
+      <div class="book-cover-subtitle">A Sleeping Beauty Storybook</div>
+      <div class="book-cover-ornament" aria-hidden="true">— ✦ —</div>
+    </div>
+  </div>
+</div>
+
+<!-- Petals -->
+<div id="petal-container" aria-hidden="true"></div>
+
+<!-- Vine nav -->
+<nav id="scroll-vine" aria-label="Timeline navigation"></nav>
+
+<!-- =====================================================
+     MAIN PAGE
+===================================================== -->
+<main id="main-page" role="main">
+
+  <header class="site-header">
+    <p class="header-eyebrow">A Storybook Gift</p>
+    <h1 class="header-title">Once Upon A<br><span>Mother's Day</span></h1>
+    <p class="header-tagline">For the one who made every moment magical</p>
+    <div class="header-ornament" aria-hidden="true">✦ ✿ ✦</div>
+  </header>
+
+  <section class="dedication-section">
+    <div class="divider" aria-hidden="true">❧ ❧ ❧</div>
+    <p>
+      In a kingdom not so far away, there lived a mother whose love was
+      <strong>the most powerful magic of all.</strong>
+      This is your story — told in chapters, in moments,
+      in all the everyday spells you cast upon our lives.
+    </p>
+    <div class="divider" aria-hidden="true">❧ ❧ ❧</div>
+  </section>
+
+  <section class="timeline-section" id="timeline">
+    <h2 class="timeline-section-title">Our Story</h2>
+    <div class="timeline-line" aria-hidden="true"></div>
+
+    <!-- ENTRY 1 -->
+    <article class="timeline-entry" data-index="0">
+      <div class="timeline-node" aria-hidden="true">🌹</div>
+      <div class="timeline-card">
+        <p class="card-date">[MONTH DAY, YEAR]</p>
+        <h3 class="card-title">Chapter One: Where It All Began</h3>
+        <p class="card-copy">
+          Every great story has a beginning. <em>This is yours.</em>
+          Write a memory, a feeling, or a moment that started it all —
+          the day the world became a little more beautiful.
+        </p>
+        <div class="media-placeholder photo-placeholder"
+             title="Replace with: <img class='actual-photo' src='assets/photos/photo-1.jpg' alt='…' />">
+          <span class="placeholder-icon">🖼️</span>
+          <span class="placeholder-label">Photo</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;img class="actual-photo" src="assets/photos/photo-1.jpg" alt="…" /&gt;</code></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY 2 -->
+    <article class="timeline-entry" data-index="1">
+      <div class="timeline-node" aria-hidden="true">✨</div>
+      <div class="timeline-card">
+        <p class="card-date">[MONTH DAY, YEAR]</p>
+        <h3 class="card-title">Chapter Two: A Cherished Memory</h3>
+        <p class="card-copy">
+          There are moments that shimmer like fairy dust in the memory —
+          the ones we return to again and again. <em>Share yours here.</em>
+        </p>
+        <div class="media-placeholder video-placeholder"
+             title="Replace with: <video class='actual-video' src='assets/videos/video-1.mp4' controls></video>">
+          <span class="placeholder-icon">🎬</span>
+          <span class="placeholder-label">Video</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;video class="actual-video" src="assets/videos/video-1.mp4" controls&gt;&lt;/video&gt;</code></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY 3 -->
+    <article class="timeline-entry" data-index="2">
+      <div class="timeline-node" aria-hidden="true">🌷</div>
+      <div class="timeline-card">
+        <p class="card-date">[MONTH DAY, YEAR]</p>
+        <h3 class="card-title">Chapter Three: Her Magic</h3>
+        <p class="card-copy">
+          Like the three good fairies, she came bearing gifts —
+          not of beauty, song, or happiness alone, but of
+          <em>unconditional love</em>, wisdom worn softly,
+          and laughter that filled every room.
+        </p>
+        <div class="media-placeholder audio-placeholder"
+             title="Replace with: <audio class='actual-audio' src='assets/audio/audio-1.mp3' controls></audio>">
+          <span class="placeholder-icon">🎵</span>
+          <span class="placeholder-label">Audio / Voice Message</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;audio class="actual-audio" src="assets/audio/audio-1.mp3" controls&gt;&lt;/audio&gt;</code></span>
+        </div>
+        <div class="media-placeholder photo-placeholder"
+             title="Replace with: <img class='actual-photo' src='assets/photos/photo-2.jpg' alt='…' />">
+          <span class="placeholder-icon">🖼️</span>
+          <span class="placeholder-label">Photo</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;img class="actual-photo" src="assets/photos/photo-2.jpg" alt="…" /&gt;</code></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY 4 -->
+    <article class="timeline-entry" data-index="3">
+      <div class="timeline-node" aria-hidden="true">🏰</div>
+      <div class="timeline-card">
+        <p class="card-date">[MONTH DAY, YEAR]</p>
+        <h3 class="card-title">Chapter Four: The Golden Years</h3>
+        <p class="card-copy">
+          A gallery of golden moments — because some stories
+          can only be told in pictures.
+        </p>
+        <div class="photo-grid">
+          <div class="media-placeholder photo-placeholder" title="Replace: gallery-1.jpg">
+            <span class="placeholder-icon">🖼️</span>
+            <span class="placeholder-label">Photo 1</span>
+          </div>
+          <div class="media-placeholder photo-placeholder" title="Replace: gallery-2.jpg">
+            <span class="placeholder-icon">🖼️</span>
+            <span class="placeholder-label">Photo 2</span>
+          </div>
+          <div class="media-placeholder photo-placeholder" title="Replace: gallery-3.jpg">
+            <span class="placeholder-icon">🖼️</span>
+            <span class="placeholder-label">Photo 3</span>
+          </div>
+          <div class="media-placeholder photo-placeholder" title="Replace: gallery-4.jpg">
+            <span class="placeholder-icon">🖼️</span>
+            <span class="placeholder-label">Photo 4</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY 5 -->
+    <article class="timeline-entry" data-index="4">
+      <div class="timeline-node" aria-hidden="true">🎶</div>
+      <div class="timeline-card">
+        <p class="card-date">[MONTH DAY, YEAR]</p>
+        <h3 class="card-title">Chapter Five: A Song for You</h3>
+        <p class="card-copy">
+          <em>"I know you, I walked with you once upon a dream…"</em>
+          Some songs carry feelings words alone cannot hold.
+          This one is for you.
+        </p>
+        <div class="media-placeholder video-placeholder"
+             title="Replace with: <video class='actual-video' src='assets/videos/video-2.mp4' controls></video>">
+          <span class="placeholder-icon">🎬</span>
+          <span class="placeholder-label">Video Message</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;video class="actual-video" src="assets/videos/video-2.mp4" controls&gt;&lt;/video&gt;</code></span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY 6 -->
+    <article class="timeline-entry" data-index="5">
+      <div class="timeline-node" aria-hidden="true">👑</div>
+      <div class="timeline-card">
+        <p class="card-date">[MONTH DAY, YEAR]</p>
+        <h3 class="card-title">Chapter Six: Happily Ever After</h3>
+        <p class="card-copy">
+          Every chapter of our story leads here —
+          to gratitude, to love, to you.
+          <em>Thank you for being our once upon a time,
+          and our happily ever after.</em>
+        </p>
+        <div class="media-placeholder photo-placeholder"
+             title="Replace with: <img class='actual-photo' src='assets/photos/final-photo.jpg' alt='…' />">
+          <span class="placeholder-icon">🖼️</span>
+          <span class="placeholder-label">Final Photo</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;img class="actual-photo" src="assets/photos/final-photo.jpg" alt="…" /&gt;</code></span>
+        </div>
+        <div class="media-placeholder audio-placeholder"
+             title="Replace with: <audio class='actual-audio' src='assets/audio/final-message.mp3' controls></audio>">
+          <span class="placeholder-icon">💌</span>
+          <span class="placeholder-label">Audio Message</span>
+          <span class="placeholder-hint">Replace with:<br><code>&lt;audio class="actual-audio" src="assets/audio/final-message.mp3" controls&gt;&lt;/audio&gt;</code></span>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <section class="closing-section" id="closing">
+    <div class="closing-roses" aria-hidden="true">🌸💙🌸</div>
+    <h2 class="closing-message">Happy Mother's Day</h2>
+    <p class="closing-sub">
+      You are the magic in every story,<br>
+      the light that never fades,<br>
+      the love that rewrites every ending.
+    </p>
+    <p class="closing-signature">
+      <!-- REPLACE with your name(s) -->
+      With all the love in the kingdom — [Your Name]
+    </p>
+  </section>
+
+</main>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+<script>
+/* ─── Sparkle canvas — blue & pink sparks ─── */
+(function() {
+  const canvas = document.getElementById('sparkle-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  window.addEventListener('resize', resize); resize();
+
+  const palette = ['#A8C8F0','#EDD07A','#F5C0CE','#7FB3E8','#FADADD','#5B8FD4'];
+
+  function Spark() { this.reset(); }
+  Spark.prototype.reset = function() {
+    this.x = Math.random() * W; this.y = Math.random() * H;
+    this.r = Math.random() * 2 + 0.5;
+    this.vx = (Math.random() - 0.5) * 0.25;
+    this.vy = -(Math.random() * 0.35 + 0.08);
+    this.life = 1; this.decay = Math.random() * 0.004 + 0.0015;
+    this.color = palette[Math.floor(Math.random() * palette.length)];
+  };
+  Spark.prototype.update = function() { this.x += this.vx; this.y += this.vy; this.life -= this.decay; if (this.life <= 0) this.reset(); };
+  Spark.prototype.draw = function() {
+    ctx.save(); ctx.globalAlpha = this.life * 0.55; ctx.fillStyle = this.color;
+    ctx.shadowBlur = 7; ctx.shadowColor = this.color;
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  };
+  const sparks = Array.from({length: 90}, () => new Spark());
+  (function loop() { ctx.clearRect(0,0,W,H); sparks.forEach(s => { s.update(); s.draw(); }); requestAnimationFrame(loop); })();
+})();
+
+/* ─── Fairy dots (intro screen) ─── */
+(function() {
+  const container = document.getElementById('fairy-container');
+  const colors = ['#A8C8F0','#F5C0CE','#EDD07A','#7FB3E8','#FADADD','#5B8FD4'];
+  for (let i = 0; i < 22; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'fairy-dot';
+    dot.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${Math.random()*5+3}px; height:${Math.random()*5+3}px;
+      background:${colors[i%colors.length]};
+      box-shadow:0 0 8px ${colors[i%colors.length]};
+      animation-duration:${Math.random()*5+4}s;
+      animation-delay:${Math.random()*4}s;`;
+    container.appendChild(dot);
+  }
+})();
+
+/* ─── Rose petals ─── */
+(function() {
+  const container = document.getElementById('petal-container');
+  const petals = ['🌸','💙','🌷','✿','❀','🌸','🩵'];
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    p.textContent = petals[i % petals.length];
+    p.style.cssText = `left:${Math.random()*100}vw; animation-duration:${Math.random()*8+7}s; animation-delay:${Math.random()*10}s; font-size:${Math.random()*0.6+0.7}rem;`;
+    container.appendChild(p);
+  }
+  document.querySelectorAll('.petal').forEach(p => p.style.animationPlayState = 'paused');
+})();
+
+/* ─────────────────────────────────────────────
+   VIDEO INTRO LOGIC
+   ─────────────────────────────────────────────
+   Flow:
+   A) If <video#intro-video> exists and loads:
+      → plays automatically → on 'ended' triggers fade → shows intro-overlay
+   B) If no video element (placeholder mode):
+      → skip button immediately triggers the same transition
+   C) Skip button always available as fallback
+───────────────────────────────────────────── */
+const videoIntro   = document.getElementById('video-intro');
+const introVideo   = document.getElementById('intro-video');   // null if commented out
+const skipBtn      = document.getElementById('skip-btn');
+const introOverlay = document.getElementById('intro-overlay');
+const bookWrapper  = document.getElementById('book-wrapper');
+const bookCover    = document.getElementById('book-cover');
+const insideZoom   = document.getElementById('book-inside-zoom');
+const mainPage     = document.getElementById('main-page');
+const scrollVine   = document.getElementById('scroll-vine');
+
+function transitionFromVideo() {
+  /* Fade out the video layer */
+  videoIntro.classList.add('fading');
+  setTimeout(() => {
+    videoIntro.classList.add('hidden');
+    /* Reveal the title / open-book screen */
+    introOverlay.classList.add('visible');
+  }, 1400);
+}
+
+if (introVideo) {
+  /* ── Video file present ── */
+  introVideo.addEventListener('canplaythrough', () => {
+    // Hide placeholder notice if somehow still visible
+    const notice = document.getElementById('video-placeholder-notice');
+    if (notice) notice.style.display = 'none';
+    introVideo.play().catch(() => {
+      // Autoplay blocked (e.g. no user gesture yet) → go straight to skip prompt
+    });
+  });
+
+  introVideo.addEventListener('ended', transitionFromVideo);
+
+  // Safety fallback: if video stalls for > 12 s, skip anyway
+  setTimeout(() => {
+    if (!videoIntro.classList.contains('hidden')) transitionFromVideo();
+  }, 12000);
+} else {
+  /* ── Placeholder mode: no video yet ──
+     The skip button is the only CTA; make it more prominent */
+  skipBtn.style.animation = 'none';
+  skipBtn.style.opacity   = '1';
+  skipBtn.textContent     = 'Enter the Storybook ›';
+  skipBtn.style.fontSize  = 'clamp(0.8rem, 2.5vw, 1rem)';
+  skipBtn.style.padding   = '0.9rem 2rem';
+  skipBtn.style.bottom    = '50%';
+  skipBtn.style.right     = '50%';
+  skipBtn.style.transform = 'translate(50%, 50%) translateY(7rem)';
+  skipBtn.style.borderColor = 'rgba(91,143,212,0.6)';
+}
+
+skipBtn.addEventListener('click', transitionFromVideo);
+
+/* ─── Book open sequence ─── */
+document.getElementById('open-book-btn').addEventListener('click', function() {
+  introOverlay.classList.add('hidden');
+  bookWrapper.classList.remove('hidden');
+  setTimeout(() => {
+    bookCover.classList.add('open');
+    setTimeout(() => {
+      insideZoom.classList.add('zoomed');
+      setTimeout(() => {
+        bookWrapper.classList.add('hidden');
+        mainPage.classList.add('visible');
+        scrollVine.classList.add('visible');
+        document.querySelectorAll('.petal').forEach(p => p.style.animationPlayState = 'running');
+      }, 1200);
+    }, 700);
+  }, 300);
+});
+
+/* ─── Scroll vine ─── */
+const entries   = document.querySelectorAll('.timeline-entry');
+const closing   = document.getElementById('closing');
+const totalDots = entries.length + 1;
+const vineDots  = [];
+for (let i = 0; i < totalDots; i++) {
+  const d = document.createElement('div');
+  d.className = 'vine-dot';
+  scrollVine.appendChild(d);
+  vineDots.push(d);
+}
+
+/* ─── Scroll reveal ─── */
+const io = new IntersectionObserver(obs => {
+  obs.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+entries.forEach(e => io.observe(e));
+io.observe(closing);
+
+function updateVine() {
+  const prog   = (document.body.scrollHeight - window.innerHeight) > 0
+    ? window.scrollY / (document.body.scrollHeight - window.innerHeight) : 0;
+  const active = Math.round(prog * (totalDots - 1));
+  vineDots.forEach((d, i) => d.classList.toggle('active', i === active));
+}
+window.addEventListener('scroll', updateVine, { passive: true });
+updateVine();
+</script>
+
+</body>
+</html>
